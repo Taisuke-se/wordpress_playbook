@@ -1,0 +1,20 @@
+---
+- name: Install MariaDB
+  yum:
+    name: mariadb-server
+    state: present
+
+- name: Start and enable MariaDB
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Secure MariaDB
+  shell: |
+    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'your_mysql_root_password';"
+    mysql -u root -p'your_mysql_root_password' -e "DELETE FROM mysql.user WHERE User='';"
+    mysql -u root -p'your_mysql_root_password' -e "DROP DATABASE test;"
+    mysql -u root -p'your_mysql_root_password' -e "FLUSH PRIVILEGES;"
+  args:
+    executable: /bin/bash

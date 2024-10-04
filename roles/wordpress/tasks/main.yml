@@ -1,0 +1,38 @@
+---
+- name: Download WordPress
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/latest.tar.gz
+
+- name: Extract WordPress
+  unarchive:
+    src: /tmp/latest.tar.gz
+    dest: /var/www/html/
+    remote_src: yes
+
+- name: Set permissions for WordPress
+  file:
+    path: /var/www/html/wordpress
+    state: directory
+    owner: apache
+    group: apache
+    recurse: yes
+
+- name: Configure Apache for WordPress
+  copy:
+    dest: /etc/httpd/conf.d/wordpress.conf
+    content: |
+      <VirtualHost *:80>
+        DocumentRoot /var/www/html/wordpress
+        <Directory /var/www/html/wordpress>
+          AllowOverride All
+          Require all granted
+        </Directory>
+        ErrorLog /var/log/httpd/wordpress-error.log
+        CustomLog /var/log/httpd/wordpress-access.log combined
+      </VirtualHost>
+
+- name: Restart Apache
+  service:
+    name: httpd
+    state: restarted
